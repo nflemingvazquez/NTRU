@@ -9,6 +9,5 @@ int main() {
 	int* test2 = polyProduct(test1,test1);
 	unsigned int bytes = (unsigned int)randombytes_uniform(RingDegree);
 	printf("Random bytes are %u \n", bytes);
-
 	return 0;
 }
