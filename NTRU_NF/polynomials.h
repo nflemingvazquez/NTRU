@@ -1,5 +1,4 @@
 #include <stdlib.h>
-#include "structs.h"
 #include "constants.h"
 #include <algorithm>
 using namespace std;
@@ -20,3 +19,4 @@ public:
 	Poly operator* (const Poly&);
 	void printValue();
 };
+

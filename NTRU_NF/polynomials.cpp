@@ -44,8 +44,14 @@ int * extendedEuclidean(int * x, int * y) {
 	return NULL;
 }
 
-int * polyDivision(int x[], int y[], unsigned int p) {
+int * polyDivision(Poly x, Poly y, unsigned int p) {
 	// Find q, r in Z[x]/p s.t. x=yq+r
+	Poly r = x;
+	Poly q(0, { 0 });
+	unsigned int u = inverseMod(q.entries[q.degree], p);
+	while (r.degree >= y.degree) {
+		
+	}
 	return NULL;
 }
 
@@ -61,9 +67,7 @@ Poly Poly::operator+(const Poly & param)
 	for (unsigned int b = 0; b <= param.degree; ++b) { // add b mononomials to sum
 		arr[b] += param.entries[b];
 	}
-	printf("deg is %u\n",deg);
 	while (arr[deg] == 0 && deg > 0) { // trailing zeroes
-		printf("arr[j] is %d\n");
 		deg--;
 	}
 	int* reduced_arr = (int*)calloc(deg+1, sizeof(int));
@@ -77,7 +81,7 @@ Poly Poly::operator-(const Poly & param)
 {
 	Poly tosubtract;
 	int * arr = (int*)calloc(param.degree + 1, sizeof(int));
-	for (int i = 0; i <= param.degree; ++i) { // set value of arr to -(param.entries)
+	for (unsigned int i = 0; i <= param.degree; ++i) { // set value of arr to -(param.entries)
 		arr[i] = -param.entries[i];
 	}
 	tosubtract.degree = param.degree;
@@ -104,7 +108,7 @@ void Poly::printValue()
 {
 	// print e.g. 1+1*x^1+0*x^2+3*x^3
 	printf("%d ", entries[0]);
-	for (int i = 1; i <= degree; i++) {
+	for (unsigned int i = 1; i <= degree; i++) {
 		printf("+ %d x^%d ", entries[i], i);
 	}
 	printf("\n");
