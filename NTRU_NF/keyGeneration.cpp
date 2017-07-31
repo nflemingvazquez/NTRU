@@ -5,7 +5,7 @@ int * randomPoly(unsigned int df) {
 	if (2 * df > RingDegree) { // too many indices would be non-zero
 		return NULL;
 	}
-	int * poly = calloc(RingDegree, sizeof(int)); // initialise zero polynomial
+	int * poly = (int*) calloc(RingDegree, sizeof(int)); // initialise zero polynomial
 	int index;
 	unsigned int t = 0;
 	while (t < df) { // make df distinct coefficients 1

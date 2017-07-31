@@ -154,15 +154,14 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="keyGeneration.c" />
-    <ClCompile Include="NTRU.c" />
-    <ClCompile Include="polynomials.c" />
+    <ClCompile Include="keyGeneration.cpp" />
+    <ClCompile Include="NTRU.cpp" />
+    <ClCompile Include="polynomials.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="constants.h" />
     <ClInclude Include="keyGeneration.h" />
     <ClInclude Include="polynomials.h" />
-    <ClInclude Include="structs.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
