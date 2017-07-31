@@ -1,2 +1,2 @@
 #pragma once
-# define RingDegree 251
+# define RingDegree 53

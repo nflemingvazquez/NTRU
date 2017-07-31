@@ -1,13 +1,23 @@
+#include <stdio.h>
+#include "keyGeneration.h"
 #include "polynomials.h"
 #include <sodium.h>
+#include <time.h>
+void printpoly(int * poly, int degree);
 
 int main() {
 	if (sodium_init() == -1) { // if LibSodium fails to initialise
 		return 1;
 	}
-	int test1[RingDegree] = { 1 }; // x^N
-	int* test2 = polyProduct(test1,test1);
-	unsigned int bytes = (unsigned int)randombytes_uniform(RingDegree);
-	printf("Random bytes are %u \n", bytes);
+	int * testpoly = randomPoly(20);
+	printpoly(testpoly, RingDegree);
 	return 0;
+}
+
+void printpoly(int * poly, int degree)
+{
+	for (int i = 0; i < degree; ++i) {
+		printf("%d, ", poly[i]);
+	}
+	printf("\n");
 }
