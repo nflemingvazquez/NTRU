@@ -156,12 +156,14 @@
   <ItemGroup>
     <ClCompile Include="keyGeneration.cpp" />
     <ClCompile Include="NTRU.cpp" />
-    <ClCompile Include="polynomials.cpp" />
+    <ClCompile Include="Poly.cpp" />
+    <ClCompile Include="polyFunctions.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="constants.h" />
     <ClInclude Include="keyGeneration.h" />
-    <ClInclude Include="polynomials.h" />
+    <ClInclude Include="Poly.h" />
+    <ClInclude Include="polyFunctions.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

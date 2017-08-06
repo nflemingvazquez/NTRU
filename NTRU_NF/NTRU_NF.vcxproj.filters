@@ -15,24 +15,30 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="polynomials.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="keyGeneration.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="NTRU.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Poly.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="polyFunctions.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="polynomials.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="keyGeneration.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="constants.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Poly.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="polyFunctions.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
