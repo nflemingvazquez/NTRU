@@ -1,8 +1,8 @@
 #include "Poly.h"
 
-unsigned int inverseMod(unsigned int x, unsigned int p);
+int inverseMod(int x, int p);
 int * extendedEuclidean(int * x, int * y);
-Poly mononomial(unsigned int n);
-void polyDiv(Poly x, Poly y, unsigned int modulus, Poly* qPtr, Poly* rPtr);
-void EEA(Poly a, Poly b, unsigned int p, Poly* uPtr, Poly* vPtr, Poly* dPtr);
-
+Poly mononomial(int n);
+void polyDiv(const Poly x, const Poly y, int modulus, Poly* qPtr, Poly* rPtr);
+void EEA(const Poly a, const Poly b, int p, Poly* uPtr, Poly* vPtr, Poly* dPtr);
+void convInverse(const Conv a, int N, int p, Conv * b);

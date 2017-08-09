@@ -4,6 +4,7 @@
 # define ees_N 443
 # define ees_p 3
 # define ees_q 2048
+# define ees_r 11 // q = 2^r
 # define ees_df1 9
 # define ees_df2 8
 # define ees_df3 5

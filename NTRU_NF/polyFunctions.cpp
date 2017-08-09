@@ -1,9 +1,9 @@
 #include "polyFunctions.h"
 
-unsigned int inverseMod(unsigned int x, unsigned int p) {
+int inverseMod(int x, int p) {
 	// return multiplicative inverse of x modulo p
 	// NB: gcd(x,p)!=1 case not handled
-	unsigned int r_k1 = x, r_k2 = p, r_k3 = 1;
+	int r_k1 = x, r_k2 = p, r_k3 = 1;
 	// unsigned as r always positive
 	int a_k1 = 1, a_k2 = 0, a_k3, q;
 	while (r_k3 != 0) {
@@ -18,14 +18,14 @@ unsigned int inverseMod(unsigned int x, unsigned int p) {
 	if (a_k1 < 0) { // a_k1 mod p
 		a_k1 += p;
 	}
-	return (unsigned int) a_k1;
+	return (int) a_k1;
 }
 
 int * extendedEuclidean(int * x, int * y) {
 	return NULL;
 }
 
-Poly mononomial(unsigned int n)
+Poly mononomial(int n)
 {
 	// return polynomial of form x^n
 	int * entries = (int*) calloc(n + 1, sizeof(int)); // array of zeroes
@@ -35,17 +35,17 @@ Poly mononomial(unsigned int n)
 	return result;
 }
 
-void polyDiv(Poly x, Poly y, unsigned int modulus, Poly* qPtr, Poly* rPtr) {
+void polyDiv(Poly x, Poly y, int modulus, Poly* qPtr, Poly* rPtr) {
 	// Find q, r in Z[x]/(p) s.t. x=yq+r
 	// Output: qPtr, rPtr
 	x.mod(modulus);
 	y.mod(modulus);
-	unsigned int m = y.getDegree();
+	int m = y.getDegree();
 	*rPtr = x;
 	*qPtr = Poly(); // reset polynomial dereferenced by qPtr to 0
-	unsigned int d = rPtr->getDegree();
+	int d = rPtr->getDegree();
 	Poly v;
-	unsigned int u = inverseMod(y.getEntry(m), modulus); // invert leading entry of y modp
+	int u = inverseMod(y.getEntry(m), modulus); // invert leading entry of y modp
 	if (u == 0) {
 		printf("Polynomial division failed!\n");
 		exit(-1);
@@ -61,7 +61,7 @@ void polyDiv(Poly x, Poly y, unsigned int modulus, Poly* qPtr, Poly* rPtr) {
 	qPtr->mod(modulus);
 }
 
-void EEA(Poly a, Poly b, unsigned int p, Poly* uPtr, Poly* vPtr, Poly* dPtr) {
+void EEA(const Poly a, const Poly b, int p, Poly* uPtr, Poly* vPtr, Poly* dPtr) {
 	// Find u, v, d in Z[x]/(p) s.t. a*u+b*v=d
 	// Output: uPtr, vPtr, dPtr
 	if (b.isZero()) {
@@ -82,11 +82,28 @@ void EEA(Poly a, Poly b, unsigned int p, Poly* uPtr, Poly* vPtr, Poly* dPtr) {
 			v1 = t1;
 			v3 = t3;
 		}
+		// NB: no reduceDegree statements because all already implicitly reduced
 		polyDiv(*dPtr - a*(*uPtr), b, p, vPtr, &v1); // set v to (d-a*u)/b
 		if (!(v1.isZero())) {
 			printf("EEA failed!\n");
 			exit(-1);
 		}
+	}
+}
+
+void convInverse(const Conv a, int N, int p, Conv * b)
+{
+	Poly aPoly = (Poly)a;
+	Poly ideal = mononomial(N) - 1; // x^N-1
+	Poly u, v, d;
+	EEA(aPoly, ideal, p, &u, &v, &d);
+	if (d.getDegree() == 0 && (!d.isZero())) { // if d non-zero constant
+		int d_0 = d.getEntry(0); // d
+		Poly result = inverseMod(d_0, p)*u;
+		*b = static_cast<Conv&>(result);
+	}
+	else { // mark as failed
+		b = NULL;
 	}
 }
 

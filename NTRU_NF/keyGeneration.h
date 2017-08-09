@@ -4,5 +4,7 @@ extern "C" { // needed because libsodium written in C
 #include <sodium.h>
 }
 #include "constants.h"
+#include "Poly.h"
 
-int * randomPoly(unsigned int df);
+Conv randomConv(int df);
+void generateKeyPair(Conv* f, Conv*);

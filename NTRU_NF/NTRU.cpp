@@ -1,4 +1,3 @@
-#include <iostream>
 #include "keyGeneration.h"
 #include "polyFunctions.h"
 extern "C" {
@@ -11,15 +10,25 @@ int main() {
 	if (sodium_init() == -1) { // if LibSodium fails to initialise
 		return 1;
 	}
-	int arr1[] = { 1,-2,1 };
-	int arr2[] = { 1,2,1 };
-	Poly p1(2, arr1);
-	p1.printValue();
-	p1.mod(5);
-	p1.printValue();
-	Poly p2(10, arr2);
-	Poly u, v, d;
-	EEA(p1, p2, 3, &u, &v, &d);
+	Conv rand = randomConv(200);
+	Conv inverse;
+	 rand.printValue();
+	 for (int t = 0; t < 10; ++t) {
+		 printf("%d\n", rand.getEntry(t));
+	 }
+	convInverse(rand,20,5,&inverse);
+	for (int t = 0; t < 10; ++t) {
+		printf("Now %d\n", rand.getEntry(t));
+	}
+	inverse.printValue();
+	(rand*inverse).printValue();
+	Poly test1 = (Conv)rand;
+	Poly test2 = inverse;
+	printf("Test 1 is "); test1.printValue();
+	Conv test3 = static_cast<Conv&>(test1);
+	printf("Test 3 is "); test3.printValue();
+	Conv a = rand * inverse;
+	// printf("a is: "); a.printValue();
 	printf("Program took %f seconds to run \n", time(NULL) - time1);
 	return 0;
 }

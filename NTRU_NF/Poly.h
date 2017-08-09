@@ -6,19 +6,19 @@ using namespace std;
 
 class Poly {
 protected: // protected, not private so that inherited by Conv class
-	unsigned int degree;
+	int degree;
 	int * entries;
 public:
 	Poly() { degree = 0; entries = (int*) calloc(1, sizeof(int)); }; // default constructor is 0
-	Poly(unsigned int a, int * b);
+	Poly(int a, int * b);
 
-	unsigned int getDegree() { return degree; }
+	int getDegree() const { return degree; }
 	int * getEntries() { return entries; }
-	int getEntry(unsigned int n);	
+	int getEntry(int n) const;	
 	Poly& reduceDegree();
-	Poly& mod(unsigned int p);
+	Poly& mod(int p);
 	
-	bool isZero();
+	bool isZero() const;
 
 	Poly& operator+=(const Poly rhs);
 	Poly& operator+=(int rhs);
@@ -37,15 +37,25 @@ public:
 	friend Poly operator*(Poly lhs, int rhs);
 	friend Poly operator*(int lhs, Poly& rhs);
 
+
 	friend Poly operator- (Poly lhs, const Poly& rhs);
 	friend Poly operator- (Poly lhs, int rhs);
 	friend Poly operator- (int lhs, Poly& rhs);
 
 	void printValue();
 };
+
+struct polyTriple {
+	Poly poly1;
+	Poly poly2;
+	Poly poly3;
+};
+
 // derived class
 class Conv : public Poly { // convolution polynomial class
 public:
+	Conv(int a, int* b) : Poly(a, b) {};
+	Conv() : Poly() {};
 	Conv& operator*=(const Conv rhs);
 	friend Conv operator*(Conv lhs, const Conv& rhs);
 };

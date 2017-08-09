@@ -54,7 +54,7 @@ Poly operator-(int lhs, Poly & rhs)
 	return rhs;
 }
 
-Poly::Poly(unsigned int a, int * b)
+Poly::Poly(int a, int * b)
 {
 	degree = a;
 	entries = (int*) calloc(a + 1, sizeof(int));
@@ -62,7 +62,7 @@ Poly::Poly(unsigned int a, int * b)
 	this->reduceDegree(); // eliminate trailing zeroes
 }
 
-int Poly::getEntry(unsigned int n)
+int Poly::getEntry(int n) const
 {
 	// return x^n coefficient of polynomial
 	if (n > degree) {
@@ -84,9 +84,9 @@ Poly & Poly::reduceDegree()
 	return *this;
 }
 
-Poly & Poly::mod(unsigned int p)
+Poly & Poly::mod(int p)
 {
-	for (unsigned int i = 0; i <= degree; ++i) {
+	for (int i = 0; i <= degree; ++i) {
 		entries[i] %= (int) p; // entry modulo p
 		if (entries[i] < 0) { // % returns negative value if argument negative
 			entries[i] += (int) p;
@@ -96,9 +96,9 @@ Poly & Poly::mod(unsigned int p)
 	return *this;
 }
 
-bool Poly::isZero() // return true iff x = 0
+bool Poly::isZero() const // return true iff x = 0
 {
-	if (this->degree == 0 && this->getEntry(0) == 0) {
+	if (degree == 0 && getEntry(0) == 0) {
 		return true;
 	}
 	return false;
@@ -106,12 +106,12 @@ bool Poly::isZero() // return true iff x = 0
 
 Poly & Poly::operator+=(const Poly rhs)
 {
-	unsigned int deg = max(degree, rhs.degree); // degree of sum is maximum of degrees
+	int deg = max(degree, rhs.degree); // degree of sum is maximum of degrees
 	int * arr = (int*)calloc(deg + 1, sizeof(int)); // initialise array of zeroes
-	for (unsigned int a = 0; a <= degree; ++a) {
+	for (int a = 0; a <= degree; ++a) {
 		arr[a] += entries[a];
 	}
-	for (unsigned int b = 0; b <= rhs.degree; ++b) { // add b mononomials to sum
+	for (int b = 0; b <= rhs.degree; ++b) { // add b mononomials to sum
 		arr[b] += rhs.entries[b];
 	}
 	this->degree = deg;
@@ -129,22 +129,25 @@ Poly & Poly::operator+=(int rhs)
 
 Poly & Poly::operator*=(const Poly rhs)
 {
-	unsigned int deg = degree + rhs.degree;
+	if (isZero() || rhs.isZero()) { // avoid returning 0x+0x^1+...
+		*this = Poly();
+		return *this;
+	}
+	int deg = degree + rhs.degree;
 	int * arr = (int*)calloc(deg + 1, sizeof(int));
-	for (unsigned int i = 0; i <= degree; ++i) {
-		for (unsigned int j = 0; j <= rhs.degree; ++j) {
+	for (int i = 0; i <= degree; ++i) {
+		for (int j = 0; j <= rhs.degree; ++j) {
 			arr[i + j] += entries[i] * rhs.entries[j];
 		}
 	}
 	degree = deg;
 	entries = arr;
-	// free(arr); // free memory taken by arr
 	return *this;
 }
 
 Poly & Poly::operator*=(int rhs)
 {
-	for (unsigned int i = 0; i <= degree; ++i) { // multiply all entries by rhs
+	for (int i = 0; i <= degree; ++i) { // multiply all entries by rhs
 		entries[i] *= rhs;
 	}
 	return *this;
@@ -167,13 +170,13 @@ void Poly::printValue()
 {
 	// print e.g. 1+1*x^1+0*x^2+3*x^3
 	printf("%d ", entries[0]);
-	for (unsigned int i = 1; i <= degree; i++) {
+	for (int i = 1; i <= degree; i++) {
 		printf("+ %d x^%u ", entries[i], i);
 	}
 	printf("\n");
 }
 
-Conv operator*(Conv lhs, const Conv & rhs)
+Conv operator*(Conv lhs, const Conv &rhs)
 {
 	lhs *= rhs;
 	return lhs;
@@ -181,10 +184,14 @@ Conv operator*(Conv lhs, const Conv & rhs)
 
 Conv & Conv::operator*=(const Conv rhs) // convolution product
 {
-	unsigned int deg = max(degree + rhs.degree, (unsigned int) ees_N + 1);
+	if (isZero() || rhs.isZero()) { // avoid returning 0x+0x^1+...
+		*this = Conv();
+		return *this;
+	}
+	int deg = max(degree + rhs.degree, (int) ees_N - 1);
 	int * arr = (int*)calloc(deg + 1, sizeof(int));
-	for (unsigned int i = 0; i <= degree; ++i) {
-		for (unsigned int j = 0; j <= rhs.degree; ++j) {
+	for (int i = 0; i <= degree; ++i) {
+		for (int j = 0; j <= rhs.degree; ++j) {
 			arr[i + j % ees_N] += entries[i] * rhs.entries[j];
 		}
 	}
