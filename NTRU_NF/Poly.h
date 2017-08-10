@@ -4,6 +4,8 @@
 #include "constants.h"
 using namespace std;
 
+struct PolyTriple;
+
 class Poly {
 protected: // protected, not private so that inherited by Conv class
 	int degree;
@@ -11,23 +13,49 @@ protected: // protected, not private so that inherited by Conv class
 public:
 	Poly() { degree = 0; entries = (int*) calloc(1, sizeof(int)); }; // default constructor is 0
 	Poly(int a, int * b);
+	Poly(PolyTriple triple); // a=a1*a2+a3
 
 	int getDegree() const { return degree; }
 	int * getEntries() { return entries; }
 	int getEntry(int n) const;	
 	Poly& reduceDegree();
-	Poly& mod(int p);
-	
 	bool isZero() const;
+	Poly& convolute();
+
+	~Poly() { // destructor
+		delete entries;
+	}
+
+	Poly(const Poly& poly2) { // copy constructor
+		degree = poly2.degree;
+		entries = new int[degree + 1];
+		memcpy(entries, poly2.entries, sizeof(int)*(degree + 1));
+	}
+
+	Poly& operator=(const Poly& rhs) {
+		if (this == &rhs) { // comparison with same pointer
+			return *this;
+		}
+		if (entries != NULL) { // clean memory already allocated
+			delete entries;
+		}
+		degree = rhs.degree;
+		entries = new int[degree + 1];
+		memcpy(entries, rhs.entries, sizeof(int)*(degree + 1));
+		return *this;
+	}
 
 	Poly& operator+=(const Poly rhs);
 	Poly& operator+=(int rhs);
 
 	Poly& operator*=(const Poly rhs);
 	Poly& operator*=(int rhs);
+	Poly& operator*=(PolyTriple rhs);
 
 	Poly& operator-();
 	Poly& operator-=(const Poly rhs);
+
+	Poly& operator%=(int p);
 
 	friend Poly operator+(Poly lhs, const Poly& rhs); // operator overloaders for +
 	friend Poly operator+(Poly lhs, int rhs);
@@ -36,26 +64,29 @@ public:
 	friend Poly operator*(Poly lhs, const Poly& rhs);
 	friend Poly operator*(Poly lhs, int rhs);
 	friend Poly operator*(int lhs, Poly& rhs);
-
+	friend Poly operator*(PolyTriple lhs, Poly& rhs);
+	friend Poly operator*(Poly& rhs, PolyTriple lhs);
 
 	friend Poly operator- (Poly lhs, const Poly& rhs);
 	friend Poly operator- (Poly lhs, int rhs);
 	friend Poly operator- (int lhs, Poly& rhs);
 
-	void printValue();
+	friend Poly operator% (Poly lhs, int rhs);
+
+	void printValue() const;
 };
 
-struct polyTriple {
-	Poly poly1;
-	Poly poly2;
-	Poly poly3;
+struct PolyTriple { // represents polynomial a=a1*a2+a3 
+	Poly a1;
+	Poly a2;
+	Poly a3;
 };
 
 // derived class
-class Conv : public Poly { // convolution polynomial class
-public:
-	Conv(int a, int* b) : Poly(a, b) {};
-	Conv() : Poly() {};
-	Conv& operator*=(const Conv rhs);
-	friend Conv operator*(Conv lhs, const Conv& rhs);
-};
+//class Conv : public Poly { // convolution polynomial class
+//public:
+//	Conv(int a, int* b) : Poly(a, b) {};
+//	Conv() : Poly() {};
+//	Conv& operator*=(const Conv rhs);
+//	friend Conv operator*(Conv lhs, const Conv& rhs);
+//};

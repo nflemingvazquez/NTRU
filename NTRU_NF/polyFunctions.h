@@ -3,6 +3,8 @@
 int inverseMod(int x, int p);
 int * extendedEuclidean(int * x, int * y);
 Poly mononomial(int n);
-void polyDiv(const Poly x, const Poly y, int modulus, Poly* qPtr, Poly* rPtr);
-void EEA(const Poly a, const Poly b, int p, Poly* uPtr, Poly* vPtr, Poly* dPtr);
-void convInverse(const Conv a, int N, int p, Conv * b);
+void polyDiv(Poly x, Poly y, int modulus, Poly* qPtr, Poly* rPtr);
+void EEA(Poly a, Poly b, int p, Poly* uPtr, Poly* vPtr, Poly* dPtr);
+// void convInverse(const Conv a, int N, int p, Conv * b);
+bool convPrimeInverse(const Poly a, int N, int p, Poly * b);
+bool convPowerInverse(const Poly a, int N, int q, int r, Poly * b);

@@ -38,12 +38,12 @@ Poly mononomial(int n)
 void polyDiv(Poly x, Poly y, int modulus, Poly* qPtr, Poly* rPtr) {
 	// Find q, r in Z[x]/(p) s.t. x=yq+r
 	// Output: qPtr, rPtr
-	x.mod(modulus);
-	y.mod(modulus);
+	x %= modulus;
+	y %= modulus;
 	int m = y.getDegree();
-	*rPtr = x;
-	*qPtr = Poly(); // reset polynomial dereferenced by qPtr to 0
-	int d = rPtr->getDegree();
+	Poly r = x;
+	Poly q;
+	int d = r.getDegree();
 	Poly v;
 	int u = inverseMod(y.getEntry(m), modulus); // invert leading entry of y modp
 	if (u == 0) {
@@ -51,59 +51,94 @@ void polyDiv(Poly x, Poly y, int modulus, Poly* qPtr, Poly* rPtr) {
 		exit(-1);
 	}
 	int counter = 0; // count number of while loops
-	while (d >= m && !(rPtr->isZero())) { // continue until r=0 or deg r < deg y
-		v = u * rPtr->getEntry(d) * mononomial(d - m);
-		*rPtr -= v*y;
-		rPtr->mod(modulus);
-		d = rPtr->getDegree(); // update value of degree of r
-		*qPtr += v;
+	while (d >= m && !(r.isZero())) { // continue until r=0 or deg r < deg y
+		v = u * r.getEntry(d) * mononomial(d - m);
+		r -= v*y;
+		r %= modulus;
+		d = r.getDegree(); // update value of degree of r
+		q += v;
 	}
-	qPtr->mod(modulus);
+	q %= modulus;
+	*rPtr = r;
+	*qPtr = q;
 }
 
-void EEA(const Poly a, const Poly b, int p, Poly* uPtr, Poly* vPtr, Poly* dPtr) {
+void EEA(Poly a, Poly b, int p, Poly* uPtr, Poly* vPtr, Poly* dPtr) {
 	// Find u, v, d in Z[x]/(p) s.t. a*u+b*v=d
 	// Output: uPtr, vPtr, dPtr
-	if (b.isZero()) {
-		*uPtr = Poly();
-		*vPtr = Poly()+1; // v = 1
+	if (b.isZero()) { // a*1+0*0=a
+		*uPtr = Poly()+1; // u = 1
+		*vPtr = Poly(); // v = 0
 		*dPtr = a;
 	}
 	else {
-		*uPtr = Poly() + 1; // u = 1
-		*dPtr = a;
+		Poly u = Poly() + 1; // u = 1
+		Poly d = a;
 		Poly v1, t1, t3, q; // initialise as 0
 		Poly v3 = b;
 		while (!(v3.isZero())) {
-			polyDiv(*dPtr, v3, p, &q, &t3); // find q, t3 s.t. d=v3*q+t3
-			t1 = *uPtr - q*v1;
-			*uPtr = v1;
-			*dPtr = v3;
+			polyDiv(d, v3, p, &q, &t3); // find q, t3 s.t. d=v3*q+t3
+			t1 = u - q*v1;
+			u = v1;
+			d = v3;
 			v1 = t1;
 			v3 = t3;
+			v1 %= p;
+			t1 %= p;
+			t3 %= p;
+			v3 %= p;
 		}
 		// NB: no reduceDegree statements because all already implicitly reduced
-		polyDiv(*dPtr - a*(*uPtr), b, p, vPtr, &v1); // set v to (d-a*u)/b
-		if (!(v1.isZero())) {
-			printf("EEA failed!\n");
+		polyDiv(d-a*u, b, p, vPtr, &v1); // set v to (d-a*u)/b
+		if (!(v1.isZero())) { // if d-a*u not divisible by b
+			printf("EEA failed!\n a*u+b*v-d is: ");
+			Poly residue = a*(*uPtr) + b*(*vPtr) - *dPtr;
+			residue %= p;
+			residue.printValue();
 			exit(-1);
+		}
+		else { // output
+			*uPtr = u;
+			*dPtr = d;
 		}
 	}
 }
 
-void convInverse(const Conv a, int N, int p, Conv * b)
+bool convPrimeInverse(const Poly a, int N, int p, Poly * b)
 {
-	Poly aPoly = (Poly)a;
 	Poly ideal = mononomial(N) - 1; // x^N-1
 	Poly u, v, d;
-	EEA(aPoly, ideal, p, &u, &v, &d);
+	EEA(a, ideal, p, &u, &v, &d);
 	if (d.getDegree() == 0 && (!d.isZero())) { // if d non-zero constant
 		int d_0 = d.getEntry(0); // d
 		Poly result = inverseMod(d_0, p)*u;
-		*b = static_cast<Conv&>(result);
+		// *b = static_cast<Conv&>(result);
+		result %= p;
+		*b = result;
+		return true;
 	}
 	else { // mark as failed
 		b = NULL;
+		return false;
 	}
+}
+
+bool convPowerInverse(const Poly a, int N, int q, int r, Poly * bPtr)
+{
+	Poly b;
+	if (convPrimeInverse(a, N, q, &b) == false) { // if a not invertible in R/(q)
+		return false;
+	}
+	int n = 2;
+	while (r > 0) {
+		b = 2 * b - a*b*b;
+		b.convolute();
+		b %= (int) pow(q,n); // mod coefficients by q^n
+		r /= 2;
+		n *= 2;
+	}
+	b %= (int)pow(q, r);
+	*bPtr = b;
+	return true;
 }
 
