@@ -1,5 +1,6 @@
 #pragma once
 #include <stdlib.h>
+#include <iostream>
 #include <algorithm> // required by max
 #include "constants.h"
 using namespace std;
@@ -16,7 +17,7 @@ public:
 	Poly(PolyTriple triple); // a=a1*a2+a3
 
 	int getDegree() const { return degree; }
-	int * getEntries() { return entries; }
+	int * getEntries();
 	int getEntry(int n) const;	
 	Poly& reduceDegree();
 	bool isZero() const;

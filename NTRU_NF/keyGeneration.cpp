@@ -34,11 +34,33 @@ PolyTriple randomTriple(int df1, int df2, int df3)
 	result.a1 = randomConv(df1);
 	result.a2 = randomConv(df2);
 	result.a3 = randomConv(df3);
+	return result;
 }
 
-void generateKeyPair(int N, int q, int p, int df1, int df2, int df3, Poly * f, Poly * g)
+void generateKeyPair(int N, int p, int s, int r, int q, int df1, int df2, int df3, int dg, Poly * fPtr, Poly * hPtr, PolyTriple * FTriPtr)
 {
-	PolyTriple triple = randomTriple(df1,df2,df3);
-
+	Poly f, F, f_q, g, g_q, h;
+	PolyTriple tri;
+	bool fInvertible = false;
+	while (fInvertible == false) { // continue until invertible polynomial generated
+		tri = randomTriple(df1,df2,df3);
+		Poly F(tri);
+		f = 1 + p*F;
+		f.convolute();
+		f %= q;
+		fInvertible = convPowerInverse(f, N, s, r, &f_q);
+	}
+	bool gInvertible = false;
+	while (gInvertible == false) {
+		g = randomConv(dg) + 1;
+		gInvertible = convPowerInverse(g, N, s, r, &g_q);
+	}
+	*fPtr = f;
+	h = f_q*g*p;
+	h.convolute();
+	h %= q;
+	*fPtr = f;
+	*hPtr = h;
+	*FTriPtr = tri;
 }
 

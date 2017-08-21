@@ -85,6 +85,13 @@ Poly::Poly(PolyTriple triple)
 	*this = triple.a1*triple.a2 + triple.a3;
 }
 
+int * Poly::getEntries()
+{
+	int * result = new int[degree + 1];
+	memcpy(result, entries, (degree + 1) * sizeof(int));
+	return result;
+}
+
 int Poly::getEntry(int n) const
 {
 	// return x^n coefficient of polynomial
@@ -207,16 +214,32 @@ Poly & Poly::operator-=(const Poly rhs)
 }
 
 Poly & Poly::operator%=(int p)
-{
+{ // mod coefficients by p, over interval [-ceil(p/2),floor(p/2)]
 	for (int i = 0; i <= degree; ++i) {
-		entries[i] %= p; // entry modulo p
-		if (entries[i] < 0) { // % returns negative value if argument negative
-			entries[i] += p;
+		int entry=entries[i]%p; // entry modulo p
+		if (entry < -ceil(p/2)) { // % returns negative value if argument negative
+			entry += p;
 		}
+		else if (entry > floor(p / 2)) {
+			entry -= p;
+		}
+		entries[i] = entry;
 	}
 	this->reduceDegree();
 	return *this;
 }
+
+//Poly & Poly::operator%=(int p)
+//{
+//	for (int i = 0; i <= degree; ++i) {
+//		entries[i] %= p; // entry modulo p
+//		if (entries[i] < 0) { // % returns negative value if argument negative
+//			entries[i] += p;
+//		}
+//	}
+//	this->reduceDegree();
+//	return *this;
+//}
 
 void Poly::printValue() const
 {

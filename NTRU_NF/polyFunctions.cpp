@@ -21,10 +21,6 @@ int inverseMod(int x, int p) {
 	return (int) a_k1;
 }
 
-int * extendedEuclidean(int * x, int * y) {
-	return NULL;
-}
-
 Poly mononomial(int n)
 {
 	// return polynomial of form x^n
@@ -123,22 +119,24 @@ bool convPrimeInverse(const Poly a, int N, int p, Poly * b)
 	}
 }
 
-bool convPowerInverse(const Poly a, int N, int q, int r, Poly * bPtr)
+bool convPowerInverse(Poly a, int N, int s, int r, Poly * bPtr)
 {
+	/* find inverse of a in R/(s^r), 
+	NB: modified according to https://assets.onboardsecurity.com/static/downloads/NTRU/resources/NTRUTech014.pdf */
 	Poly b;
-	if (convPrimeInverse(a, N, q, &b) == false) { // if a not invertible in R/(q)
+	int q =  (int) pow(s, r); // recalculate q from s, r
+	if (convPrimeInverse(a, N, s, &b) == false) { // if a not invertible in R/(q)
 		return false;
 	}
-	int n = 2;
-	while (r > 0) {
-		b = 2 * b - a*b*b;
+	int t = s;
+	while (t < q) {
+		t *= t;
+		b = b*(2 - a*b);
 		b.convolute();
-		b %= (int) pow(q,n); // mod coefficients by q^n
-		r /= 2;
-		n *= 2;
+		b %= t;
 	}
-	b %= (int)pow(q, r);
 	*bPtr = b;
+	if (b.isZero()) return false;
 	return true;
 }
 
