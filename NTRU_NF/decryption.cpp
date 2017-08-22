@@ -1,6 +1,6 @@
 #include "decryption.h"
 
-bool decryptMessage(Poly e, Poly f, Poly h, Poly * cPtr)
+bool decryptMessage(Poly e, Poly f, Poly h, string * decPtr)
 {
 	Poly a = (f*e).convolute()%ees_q;
 	Poly b = a % ees_p;
@@ -12,9 +12,8 @@ bool decryptMessage(Poly e, Poly f, Poly h, Poly * cPtr)
 	int * entries = c.getEntries();
 	int * arr = (int*)calloc(ees_N, sizeof(int));
 	memcpy(arr, c.getEntries(), (c.getDegree() + 1) * sizeof(int));
-	printf("\n\n");
-	for (int i = 0; i < ees_bLen / 3; i += 2) { // can ignore last entry since last byte of message always padded
-		int check = 10 * (arr[i] + 1) + arr[i+1] + 1; // convert pair of entries to 2 digit number so it can be handled by switch-case, 1 -> 2, 0 -> 1, -1 -> 0
+	for (int i = 0; i < ees_bLen / 3; ++i) { // can ignore last entry since last byte of message always padded
+		int check = 10 * (arr[2*i] + 1) + arr[2*i+1] + 1; // convert pair of entries to 2 digit number so it can be handled by switch-case, 1 -> 2, 0 -> 1, -1 -> 0
 		switch (check) {
 		case(11): // <-> {0,0}
 			// all 3 bits already set to 0
@@ -46,12 +45,16 @@ bool decryptMessage(Poly e, Poly f, Poly h, Poly * cPtr)
 			decBits[3 * i + 2] = 1;
 			break;
 		default:
-			printf("check=%d,entries[i]=%d,[i+1]=%d\n", check,entries[i],entries[i+1]);
-			printf("Failed to convert decrypted polynomial!\n");
 			return false;
 		}
 	}
-	char * decrypted = bitsetToString(decBits);
-	cout << decrypted << endl;
+	string msg = bitsetToString(decBits);
+	int size = msg[ees_db / 8]; // byte storing length
+	char * dec = new char[size + 1];
+	msg.copy(dec, size, ees_db / 8 + 1);
+	dec[size] = '\0';
+	string decStr(dec);
+	*decPtr = decStr;
+	free(arr);
 	return true;
 }

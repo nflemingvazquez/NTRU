@@ -17,7 +17,6 @@ void encryptMessage(string plaintext, Poly h, Poly * ePtr) {
 		string M = string(buff) + l + plaintext + p0;
 
 		bitset <ees_bLen> mbin = stringToBitset(M);
-		cout << mbin.to_string() << endl; // debug
 		int * arr = (int*)calloc(ees_N + 1, sizeof(int)); // array with additional byte because ees_N odd
 		for (int i = 0; i < ees_bLen / 3;++i) { // generate entries of ternary polynomial from bits of message
 			int val = (mbin[3 * i] << 2) + (mbin[3 * i + 1] << 1) + mbin[3 * i + 2]; // value represented by 3 bits

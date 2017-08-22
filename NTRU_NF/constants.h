@@ -2,6 +2,7 @@
 //
 // ees443ep1 set of parameters
 // believed to be suitable for 128 bit pre/post-quantum security level
+# define ees_securityLevel 128
 # define ees_N 443
 # define ees_p 3
 # define ees_q 2048
