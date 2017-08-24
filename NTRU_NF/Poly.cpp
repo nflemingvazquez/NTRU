@@ -136,8 +136,10 @@ Poly & Poly::convolute()
 		delete entries; // free memory used by entries
 		entries = new int[degree + 1];
 		memcpy(entries,arr,sizeof(int)*ees_N);
+		sodium_memzero(arr, ees_N*sizeof(int));
 		delete arr;
 		degree = ees_N - 1;
+		this->reduceDegree();
 		return *this;
 	}
 }
@@ -155,7 +157,6 @@ Poly & Poly::operator+=(const Poly rhs)
 	this->degree = deg;
 	this->entries = arr;
 	this->reduceDegree();
-	// free(arr);
 	return *this;
 }
 
@@ -228,18 +229,6 @@ Poly & Poly::operator%=(int p)
 	this->reduceDegree();
 	return *this;
 }
-
-//Poly & Poly::operator%=(int p)
-//{
-//	for (int i = 0; i <= degree; ++i) {
-//		entries[i] %= p; // entry modulo p
-//		if (entries[i] < 0) { // % returns negative value if argument negative
-//			entries[i] += p;
-//		}
-//	}
-//	this->reduceDegree();
-//	return *this;
-//}
 
 void Poly::printValue() const
 {

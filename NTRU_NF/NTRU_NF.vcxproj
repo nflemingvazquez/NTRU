@@ -170,7 +170,6 @@
     <ClInclude Include="decryption.h" />
     <ClInclude Include="encryption.h" />
     <ClInclude Include="keyGeneration.h" />
-    <ClInclude Include="NTRU.h" />
     <ClInclude Include="Poly.h" />
     <ClInclude Include="polyFunctions.h" />
   </ItemGroup>

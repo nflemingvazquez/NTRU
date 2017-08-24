@@ -6,11 +6,9 @@
 #include <fstream>
 using namespace std;
 
-void polyToString(Poly a, string str);
-Poly stringToPoly(const string str);
-bitset <ees_bLen> stringToBitset(string str);
-string getFile(string filename, string directory);
-void createFile(string str, string filename, string directory);
-string bitsetToString(bitset <ees_bLen> bits);
+bitset <ees_bLen> stringToBitset(char * str);
+void createFile(const char * str, size_t size, string filename, string directory);
+bool getFile(string filename, string directory, char ** strPtr, size_t * sizePtr);
+char * bitsetToString(bitset <ees_bLen> bits);
 void polyToFile(Poly a, string filename, string directory);
-Poly convFromFile(string filename, string directory);
+bool convFromFile(string filename, string directory, Poly * convPtr);

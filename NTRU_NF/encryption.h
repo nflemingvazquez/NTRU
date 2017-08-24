@@ -5,5 +5,4 @@
 #include <iostream>
 using namespace std;
 
-Poly bytesToPoly(int * m, int length);
-void encryptMessage(string plaintext, Poly h, Poly * ePtr);
+void encryptMessage(char * plaintext, size_t lenPlaintext, Poly h, Poly * ePtr);

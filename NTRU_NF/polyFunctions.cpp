@@ -27,7 +27,7 @@ Poly mononomial(int n)
 	int * entries = (int*) calloc(n + 1, sizeof(int)); // array of zeroes
 	entries[n] = 1; // set leading coefficient to 1
 	Poly result(n, entries);
-	// free(entries);
+	free(entries);
 	return result;
 }
 

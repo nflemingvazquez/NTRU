@@ -56,9 +56,6 @@
     <ClInclude Include="conversion.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="NTRU.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="decryption.h">
       <Filter>Header Files</Filter>
     </ClInclude>

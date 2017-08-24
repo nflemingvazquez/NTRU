@@ -1,7 +1,11 @@
 #pragma once
 #include <stdlib.h>
+#include <string>
 #include <iostream>
 #include <algorithm> // required by max
+extern "C" {
+#include <sodium.h>
+}
 #include "constants.h"
 using namespace std;
 
@@ -24,6 +28,7 @@ public:
 	Poly& convolute();
 
 	~Poly() { // destructor
+		sodium_memzero(entries, (degree + 1) * sizeof(int));
 		delete entries;
 	}
 

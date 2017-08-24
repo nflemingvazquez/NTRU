@@ -1,22 +1,21 @@
 #include "encryption.h"
 
-Poly bytesToPoly(int * m, int length)
-{
-	return Poly();
-}
-
-void encryptMessage(string plaintext, Poly h, Poly * ePtr) {
-	if (plaintext.length() > ees_maxMsgLenBytes) {
+void encryptMessage(char * plaintext, size_t lenPlaintext, Poly h, Poly * ePtr) {
+	if (lenPlaintext > ees_maxMsgLenBytes) {
 		printf("Message too long!\n");
 	}
 	else {
-		char l = plaintext.length();
 		char * buff = new char[ees_db / 8];
 		randombytes_buf(buff, ees_db / 8); // generate ees_db/8 random bytes
-		string p0(ees_maxMsgLenBytes - l, 0x0); // 
-		string M = string(buff) + l + plaintext + p0;
-
+		char * M = (char*)calloc(ees_bufferLenBits / 8 + 1,1); // M = buff + plaintext + some zero bytes
+		memcpy(M, buff, ees_db / 8);
+		M[ees_db / 8] = lenPlaintext;
+		memcpy(M + ees_db / 8 + 1, plaintext, lenPlaintext);
 		bitset <ees_bLen> mbin = stringToBitset(M);
+		sodium_memzero(buff, ees_db / 8);
+		sodium_memzero(M, ees_bufferLenBits);
+		free(buff);
+		free(M);
 		int * arr = (int*)calloc(ees_N + 1, sizeof(int)); // array with additional byte because ees_N odd
 		for (int i = 0; i < ees_bLen / 3;++i) { // generate entries of ternary polynomial from bits of message
 			int val = (mbin[3 * i] << 2) + (mbin[3 * i + 1] << 1) + mbin[3 * i + 2]; // value represented by 3 bits
@@ -58,8 +57,10 @@ void encryptMessage(string plaintext, Poly h, Poly * ePtr) {
 		int * entries = new int[ees_N];
 		memcpy(entries, arr, ees_N * sizeof(int));
 		Poly m(ees_N - 1, entries);
-		memset(arr, 0, sizeof(int)); // zero out entries
-		memset(entries, 0, sizeof(int));
+		
+		sodium_memzero(arr, (ees_N+1)*sizeof(int)); // zero out entries
+		sodium_memzero(entries, ees_N*sizeof(int));
+
 		free(arr);
 		free(entries);
 		PolyTriple rTri = randomTriple(ees_dr1, ees_dr2, ees_dr3);
@@ -70,8 +71,3 @@ void encryptMessage(string plaintext, Poly h, Poly * ePtr) {
 		*ePtr = e;
 	}
 }
-
-//unsigned char * hash1 = new unsigned char[50];
-//crypto_generichash(hash1, 50,
-//(unsigned char*)m.getEntries(), m.getDegree() * sizeof(int),
-//NULL, 0);

@@ -1,33 +1,10 @@
 #pragma once
 #include "conversion.h"
 
-void polyToString(Poly a, string str)
-{ // convert coefficients of polynomial in R/(q) to string
-	bitset <ees_r*ees_N> bits; // bitset used to store coefficients
-	int deg = a.getDegree();
-	int * arr = new int[deg+1];
-	memcpy(arr,a.getEntries(),(deg+1)*sizeof(int));
-	int counter = 0;
-	for (int i = 0; i <= deg; ++i) {
-		bitset <ees_r> curr(arr[i]); // current entry in binary
-		for (int j = 0; j < ees_r; ++j) {
-			bits[counter] = curr[j];
-			counter += 1;
-		}
-	}
-	string temp = bits.to_string();
-}
-
-Poly stringToPoly(const string str) {
-	bitset <ees_r*ees_N> bits(str); // convert string to bitstream
-	int * arr = new int[ees_N];
-	return Poly();
-}
-
-bitset <ees_bLen> stringToBitset(string str) {
+bitset <ees_bLen> stringToBitset(char * str) {
 	// convert string to bitset, zero-padded to right, if too long bytes truncated
 	bitset <ees_bLen> bits;
-	for (int i = 0; i < max((int)str.length(), ees_bLen / 8); ++i) {
+	for (int i = 0; i < max((int)strlen(str), ees_bLen / 8); ++i) {
 		//cout << "Maximum is " << max((int)str.length(), ees_bLen / 8) << endl;
 		unsigned char c = str[i];
 		for (int j = 7; j >= 0 && c; --j) {
@@ -40,7 +17,7 @@ bitset <ees_bLen> stringToBitset(string str) {
 	return bits;
 }
 
-string bitsetToString(bitset <ees_bLen> bits) {
+char * bitsetToString(bitset <ees_bLen> bits) {
 	// convert bitset to string, ignoring last bits
 	int length = ees_bLen/8;
 	char * chars = new char[length+1]; // +1 due to null terminator
@@ -52,65 +29,74 @@ string bitsetToString(bitset <ees_bLen> bits) {
 		chars[i] = c;
 	}
 	chars[length] = '\0';
-	string str(chars);
-	return str;
+	return chars;
 }
 
-string getFile(string filename, string directory)
-{ // read file from Alice/Bob/channel
+bool getFile(string filename, string directory, char ** strPtr, size_t * sizePtr)
+{ // return char array without null terminator
 	if (directory != "Alice" && directory != "Channel" && directory != "Bob") {
-		printf("Invalid directory!\n");
-		return "";
+	 	printf("Invalid directory!\n");
+		return false;
 	}
 	fstream fi ("../Demo/"+directory+"/"+filename, ios::in | ios::binary);
 	if (fi) { // if opened
-		string plaintext;
 		fi.seekg(0,ios::end);
-		plaintext.resize(fi.tellg());
+		size_t len = (size_t) fi.tellg();
+		char * plaintext=new char[len];
 		fi.seekg(0, ios::beg);
-		fi.read(&plaintext[0], plaintext.size());
+		fi.read(plaintext, len);
 		fi.close();
-		return(plaintext);
+		*strPtr = plaintext;
+		*sizePtr = len;
+		return(true);
 	}
 	else {
 		cout << "File " << filename << " not found!" << endl;
-		return "";
+		return false;
 	}
 }
 
-void createFile(string str, string filename, string directory)
+void createFile(const char * str, size_t size, string filename, string directory)
 {
 	if (directory != "Alice" && directory != "Channel" && directory != "Bob") {
 		printf("Invalid directory!\n");
 	}
-	const char * temp = str.c_str();
 	fstream fi("../Demo/" + directory + "/" + filename, ios::out | ios::binary);
-	fi.write(temp, str.length());
+	fi.write(str, size);
 	fi.close();
 }
 
 void polyToFile(Poly a, string filename, string directory) 
 { // write polynomial to file
-	if (directory != "Alice" && directory != "Channel" && directory != "Bob") {
-		printf("Invalid directory!\n");
-	}
-	char *str = new char[(a.getDegree()+1) * sizeof(int)];
-	memcpy(str, a.getEntries(), (a.getDegree()+1) * sizeof(int));
-	fstream fi("../Demo/" + directory + "/" + filename, ios::out | ios::binary);
-	fi.write(str, (a.getDegree()+1) * sizeof(int));
-	fi.close();
+	char * arr = (char*)a.getEntries();
+	int size = sizeof(int)*a.getDegree();
+	createFile(arr, size, filename, directory);
+	sodium_memzero(arr, size);
+	free(arr);
 }
 
-Poly convFromFile(string filename, string directory) {
-	string str = getFile(filename, directory);
-	if (str.length() > ees_N * sizeof(int) || str.length() % sizeof(int) != 0) {
-		cout << "Error: file " << filename << " invalid!";
-		exit(-1);
+bool convFromFile(string filename, string directory, Poly * convPtr) {
+	char * str;
+	size_t size;
+	if (!getFile(filename, directory, &str, &size)) {
+		cout << "Failed to open " << filename << endl;
+		return false;
+	}
+	if (size > ees_N * sizeof(int) || size % sizeof(int) != 0) {
+		cout << "Error: file " << filename << " invalid!" << endl;
+		return false;
 	}
 	else {
-		int * entries = (int*)str.c_str();
-		int degree = (int)(str.length() / sizeof(int) - 1);
+		int * entries = new int[size / 4];
+		memcpy(entries, str, size);
+		int degree = (int)(size / sizeof(int) - 1);
 		Poly result(degree, entries);
-		return result;
+		sodium_memzero(str, size);
+		sodium_memzero(entries, size);
+		free(str);
+		free(entries);
+
+		*convPtr = result;
+		return true;
 	}
 }
