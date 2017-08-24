@@ -27,10 +27,10 @@ int main() {
 		switch (param) {
 		case(1): {
 			time(&time1);
-			Poly f1, h;
+			Poly f, h;
 			PolyTriple tri;
-			generateKeyPair(ees_N, ees_p, ees_s, ees_r, ees_q, ees_df1, ees_df2, ees_df3, ees_dg, &f1, &h, &tri);
-			polyToFile(f1, "private.bin", "Bob");
+			generateKeyPair(ees_N, ees_p, ees_s, ees_r, ees_q, ees_df1, ees_df2, ees_df3, ees_dg, &f, &h, &tri);
+			polyToFile(f, "private.bin", "Bob");
 			cout << "Private key written to Bob/private.bin" << endl;
 			polyToFile(h, "public.bin", "Channel");
 			cout << "Public key written to Channel/public.bin" << endl;

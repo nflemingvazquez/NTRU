@@ -26,6 +26,7 @@ public:
 	Poly& reduceDegree();
 	bool isZero() const;
 	Poly& convolute();
+	unsigned char * hash();
 
 	~Poly() { // destructor
 		sodium_memzero(entries, (degree + 1) * sizeof(int));

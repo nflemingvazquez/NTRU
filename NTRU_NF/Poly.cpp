@@ -144,6 +144,13 @@ Poly & Poly::convolute()
 	}
 }
 
+unsigned char * Poly::hash()
+{
+	unsigned char hash[crypto_generichash_BYTES];
+	crypto_generichash(hash, sizeof(hash), (unsigned char*) entries, (degree + 1) * sizeof(int), NULL, 0);
+	return hash;
+}
+
 Poly & Poly::operator+=(const Poly rhs)
 {
 	int deg = max(degree, rhs.degree); // degree of sum is maximum of degrees

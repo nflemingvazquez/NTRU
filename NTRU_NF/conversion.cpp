@@ -2,9 +2,9 @@
 #include "conversion.h"
 
 bitset <ees_bLen> stringToBitset(char * str) {
-	// convert string to bitset, zero-padded to right, if too long bytes truncated
+	// convert string to bitset, padded to right, if too long bytes truncated
 	bitset <ees_bLen> bits;
-	for (int i = 0; i < max((int)strlen(str), ees_bLen / 8); ++i) {
+	for (int i = 0; i < ees_bLen / 8; ++i) {
 		//cout << "Maximum is " << max((int)str.length(), ees_bLen / 8) << endl;
 		unsigned char c = str[i];
 		for (int j = 7; j >= 0 && c; --j) {
@@ -20,7 +20,7 @@ bitset <ees_bLen> stringToBitset(char * str) {
 char * bitsetToString(bitset <ees_bLen> bits) {
 	// convert bitset to string, ignoring last bits
 	int length = ees_bLen/8;
-	char * chars = new char[length+1]; // +1 due to null terminator
+	char * chars = new char[length]; // +1 due to null terminator
 	for (int i = 0; i < length; ++i) { // iterate byte by byte
 		char c = 0;
 		for (int j = 0; j < 8; ++j) {
@@ -28,7 +28,6 @@ char * bitsetToString(bitset <ees_bLen> bits) {
 		}
 		chars[i] = c;
 	}
-	chars[length] = '\0';
 	return chars;
 }
 
@@ -69,7 +68,7 @@ void createFile(const char * str, size_t size, string filename, string directory
 void polyToFile(Poly a, string filename, string directory) 
 { // write polynomial to file
 	char * arr = (char*)a.getEntries();
-	int size = sizeof(int)*a.getDegree();
+	int size = sizeof(int)*(a.getDegree() + 1);
 	createFile(arr, size, filename, directory);
 	sodium_memzero(arr, size);
 	free(arr);
