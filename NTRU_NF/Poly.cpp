@@ -104,13 +104,15 @@ int Poly::getEntry(int n) const
 Poly & Poly::reduceDegree()
 {
 	// remove trailing zero entries from polynomial
+	int oldDeg = degree;
 	while (entries[degree] == 0 && degree > 0) {
 		degree--;
 	}
 	int * reduced_arr = (int*)calloc(degree + 1, sizeof(int));
 	memcpy(reduced_arr, entries, (degree + 1) * sizeof(int)); // copy non-trailing part
-	this->entries = reduced_arr;
-	// free(reduced_arr);
+	sodium_memzero(entries, sizeof(int)*(oldDeg + 1));
+	free(entries);
+	entries = reduced_arr;
 	return *this;
 }
 
