@@ -52,9 +52,9 @@ bool decryptMessage(Poly e, Poly f, Poly h, char ** decPtr, size_t * lengthPtr)
 	char * msg = bitsetToString(decBits);
 	int size = msg[ees_db / 8]; // byte storing length
 	// retrieve original message from surrounding buffer
-	char * dec = new char[size];
+	char * dec = (char*)malloc(size);
 	if (ees_db / 8 + 1 + size > ees_bLen / 8 || size == 0) return false; // avoid buffer overflow
-	memcpy(msg + ees_db / 8 + 1, dec, size);
+	memcpy(dec, msg + ees_db / 8 + 1, size);
 	sodium_memzero(entries, (c.getDegree() + 1) * sizeof(int));
 	sodium_memzero(arr, (c.getDegree() + 1) * sizeof(int));
 	sodium_memzero(msg, ees_bLen / 8);

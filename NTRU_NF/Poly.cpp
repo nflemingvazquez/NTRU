@@ -87,7 +87,7 @@ Poly::Poly(PolyTriple triple)
 
 int * Poly::getEntries()
 {
-	int * result = new int[degree + 1];
+	int * result = (int*)malloc(sizeof(int)*(degree + 1));
 	memcpy(result, entries, (degree + 1) * sizeof(int));
 	return result;
 }
@@ -95,7 +95,7 @@ int * Poly::getEntries()
 int Poly::getEntry(int n) const
 {
 	// return x^n coefficient of polynomial
-	if (n > degree) {
+	if (n > degree||n<0) {
 		return 0;
 	}
 	return entries[n];
@@ -124,24 +124,19 @@ bool Poly::isZero() const // return true iff x = 0
 
 Poly & Poly::convolute()
 { // return convolution form
-	if (degree < ees_N) { // if degree < ees_N already convoluted
-		return *this;
-	}
-	else {
-		int * arr = new int[ees_N];
-		memcpy(arr, entries, sizeof(int)*ees_N); // initialise arr using first N entries of poly
+	if (degree >= ees_N) {
 		for (int i = ees_N; i <= degree; ++i) { // x^k coefficient of result = sum of x^(k modN) coefficients
-			arr[i % ees_N] += entries[i];
+			entries[i % ees_N] += entries[i];
 		}
-		delete entries; // free memory used by entries
-		entries = new int[degree + 1];
-		memcpy(entries,arr,sizeof(int)*ees_N);
-		sodium_memzero(arr, ees_N*sizeof(int));
-		delete arr;
+		int * arr = (int*)malloc(sizeof(int)*ees_N); // smaller buffer to copy entries into
+		memcpy(arr, entries, sizeof(int)*ees_N);
+		sodium_memzero(entries, sizeof(int)*(degree + 1)); // zero out previously used memory
+		free(entries);
+		entries = arr;
 		degree = ees_N - 1;
 		this->reduceDegree();
-		return *this;
 	}
+	return *this;
 }
 
 unsigned char * Poly::hash()

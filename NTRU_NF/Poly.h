@@ -30,12 +30,12 @@ public:
 
 	~Poly() { // destructor
 		sodium_memzero(entries, (degree + 1) * sizeof(int));
-		delete entries;
+		free(entries);
 	}
 
 	Poly(const Poly& poly2) { // copy constructor
 		degree = poly2.degree;
-		entries = new int[degree + 1];
+		entries = (int*)malloc(sizeof(int)*(degree + 1));
 		memcpy(entries, poly2.entries, sizeof(int)*(degree + 1));
 	}
 
@@ -44,10 +44,10 @@ public:
 			return *this;
 		}
 		if (entries != NULL) { // clean memory already allocated
-			delete entries;
+			free(entries);
 		}
 		degree = rhs.degree;
-		entries = new int[degree + 1];
+		entries = (int*)malloc(sizeof(int)*(degree + 1));
 		memcpy(entries, rhs.entries, sizeof(int)*(degree + 1));
 		return *this;
 	}

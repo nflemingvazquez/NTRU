@@ -5,7 +5,7 @@ void encryptMessage(char * plaintext, size_t lenPlaintext, Poly h, Poly * ePtr) 
 		cout << "Message too long!" << endl;
 	}
 	else {
-		char * buff = new char[ees_db / 8];
+		char * buff = (char*)malloc(ees_db / 8);
 		randombytes_buf(buff, ees_db / 8); // generate ees_db/8 random bytes
 		char * M = (char*)calloc(ees_bufferLenBits / 8 + 1, 1); // M = buff + plaintext + some zero bytes
 		memcpy(M, buff, ees_db / 8);
@@ -50,7 +50,7 @@ void encryptMessage(char * plaintext, size_t lenPlaintext, Poly h, Poly * ePtr) 
 				break;
 			}
 		}
-		int * entries = new int[ees_N];
+		int * entries = (int*)malloc(sizeof(int)*ees_N);
 		memcpy(entries, arr, ees_N * sizeof(int));
 		Poly m(ees_N - 1, entries);
 		

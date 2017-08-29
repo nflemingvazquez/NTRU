@@ -20,7 +20,7 @@ bitset <ees_bLen> stringToBitset(char * str) {
 char * bitsetToString(bitset <ees_bLen> bits) {
 	// convert bitset to string, ignoring last bits
 	int length = ees_bLen/8;
-	char * chars = new char[length]; // +1 due to null terminator
+	char * chars = (char*)malloc(length); // +1 due to null terminator
 	for (int i = 0; i < length; ++i) { // iterate byte by byte
 		char c = 0;
 		for (int j = 0; j < 8; ++j) {
@@ -41,7 +41,7 @@ bool getFile(string filename, string directory, char ** strPtr, size_t * sizePtr
 	if (fi) { // if opened
 		fi.seekg(0,ios::end);
 		size_t len = (size_t) fi.tellg();
-		char * plaintext=new char[len];
+		char * plaintext = (char*)malloc(len);
 		fi.seekg(0, ios::beg);
 		fi.read(plaintext, len);
 		fi.close();
@@ -86,7 +86,7 @@ bool convFromFile(string filename, string directory, Poly * convPtr) {
 		return false;
 	}
 	else {
-		int * entries = new int[size / 4];
+		int * entries = (int*)malloc(size);
 		memcpy(entries, str, size);
 		int degree = (int)(size / sizeof(int) - 1);
 		Poly result(degree, entries);

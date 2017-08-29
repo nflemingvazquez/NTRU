@@ -25,6 +25,8 @@ Poly randomConv(int df) {
 		}
 	}
 	Poly result(ees_N - 1, arr);
+	sodium_memzero(arr, ees_N * sizeof(int));
+	free(arr);
 	return result;
 }
 
