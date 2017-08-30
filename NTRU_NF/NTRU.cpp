@@ -4,11 +4,12 @@
 #include <time.h>
 #include <sstream>
 #include <stdio.h>
-#include <filesystem>
-#include <filesystem>
+#include <experimental/filesystem>
+namespace fs = experimental::filesystem;
 
 int main() {
-	time_t time1, time2;
+	clock_t time1, time2;
+	double CPUTimeUsed;
 	int param=0;
 	string option;
 	if (sodium_init() == -1) { // if LibSodium fails to initialise
@@ -17,7 +18,7 @@ int main() {
 	// rename constants defined in LibSodium for readability
 	const size_t cipherBaseSize = crypto_aead_xchacha20poly1305_ietf_ABYTES;
 
-	cout << "NTRU NF Encryption suite" << endl;
+	cout << "NTRU NF Encryption Suite" << endl;
 	cout << "Security level: " << ees_securityLevel << " bits" << endl;
 	cout << "Options:" << endl;
 	cout << "1) Initiate session" << endl;
@@ -30,13 +31,14 @@ int main() {
 		cout << "Choose option: ";
 		getline(cin, option);
 		stringstream(option) >> param;
+		time1 = clock();
 		switch (param) {
 		case(1): {
-			time(&time1);
 			// NTRU key generation, performed by Bob
 			Poly f, h;
 			PolyTriple tri;
 			generateKeyPair(ees_N, ees_p, ees_s, ees_r, ees_q, ees_df1, ees_df2, ees_df3, ees_dg, &f, &h, &tri);
+			fs::create_directory("../Demo/Channel");
 			polyToFile(h, "public.bin", "Channel");
 			cout << "Generated NTRU key pair" << endl;
 			// generation and encryption of secret key, performed by Alice
@@ -67,16 +69,15 @@ int main() {
 				createFile(decrypted, decLength, "secret.bin", "Bob");
 				sodium_memzero(decrypted, strlen(decrypted));
 				free(decrypted);
+				cout << "Successfully initiated new session" << endl;
 			}
 			else {
 				cout << "Failed to create session; NTRU ciphertext decryption failed" << endl;
 				break;
 			}
-			time(&time2);
 			break;
 		}
 		case(2): {
-			time(&time1);
 			// create nonce for use with this message
 			const size_t nonceSize = crypto_aead_xchacha20poly1305_ietf_NPUBBYTES;
 			char * nonce = (char*)malloc(nonceSize);
@@ -88,7 +89,7 @@ int main() {
 			size_t secretKeySize;
 			createFile(nonce, nonceSize, "nonce.bin", "Channel");
 			if (getFile("secret.bin", "Alice", &secretKey, &secretKeySize) &&
-				getFile("plaintext.txt", "Alice", &plaintext, &plaintextSize)) {
+				getFile("plaintext", "Alice", &plaintext, &plaintextSize)) {
 				size_t ciphertextSize;
 				char * ciphertext = (char*)malloc(cipherBaseSize + plaintextSize);
 				crypto_aead_xchacha20poly1305_ietf_encrypt((unsigned char*)ciphertext, &ciphertextSize,
@@ -96,17 +97,18 @@ int main() {
 					NULL, 0,
 					NULL, (const unsigned char*)nonce, (const unsigned char*)secretKey);
 				createFile(ciphertext, ciphertextSize, "ciphertext.bin", "Channel");
-				cout << "Message encrypted successfully" << endl;
+				cout << "Message encrypted successfully!" << endl;
 				free(ciphertext);
+			}
+			else {
+				cout << "Message encryption failed, try initiating new session.";
 			}
 			free(nonce);
 			free(plaintext);
 			free(secretKey);
-			time(&time2);
 			break;
 		}
 		case(3): {
-			time(&time1);
 			char * nonce=NULL;
 			char * secretKey=NULL;
 			char * ciphertext=NULL;
@@ -125,7 +127,7 @@ int main() {
 					NULL,
 					0,
 					(const unsigned char*)nonce, (const unsigned char*)secretKey) == 0) {
-					createFile(decrypted, decryptedSize, "decrypted.txt", "Bob");
+					createFile(decrypted, decryptedSize, "decrypted", "Bob");
 					cout << "Message decrypted successfully!" << endl;
 				 }
 				else {
@@ -135,12 +137,14 @@ int main() {
 			else {
 				cout << "Message decryption failed!" << endl;
 			}
-			time(&time2);
 			break;
 		}
-		case(4): {
-			// remove session-specific files
-
+		case(4): { 
+			string ext = "../Demo/";
+			fs::remove_all(ext+"Channel"); // delete channel directory
+			fs::remove(ext + "Alice/secret.bin");
+			fs::remove(ext + "Bob/secret.bin");
+			cout << "Session files deleted" << endl;
 			break;
 		}
 		case(5): 
@@ -150,8 +154,9 @@ int main() {
 			cout << "Invalid option!" << endl;
 			break;
 		}
-		double elapsed = difftime(time2, time1);
-		printf("Program took %f seconds to run \n", elapsed);
+		time2 = clock();
+		CPUTimeUsed = (double)(time2 - time1) / CLOCKS_PER_SEC;
+		printf("Process took %.3f seconds to run \n", CPUTimeUsed);
 	}
 	return 0;
 }

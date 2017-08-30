@@ -1,2 +1,0 @@
-When we create key exchanges we want them to be secure for a variety of purposes. The key exchange you present does eliminate long term keys prone to compromise. It doesn't protect against the partial failure of random number generators or prevent one party from forcing bits of the shared key.
-
