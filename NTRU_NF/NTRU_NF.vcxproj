@@ -159,6 +159,7 @@
     <ClCompile Include="conversion.cpp" />
     <ClCompile Include="decryption.cpp" />
     <ClCompile Include="encryption.cpp" />
+    <ClCompile Include="FFT.cpp" />
     <ClCompile Include="keyGeneration.cpp" />
     <ClCompile Include="NTRU.cpp" />
     <ClCompile Include="Poly.cpp" />
