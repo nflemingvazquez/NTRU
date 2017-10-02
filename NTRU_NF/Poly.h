@@ -26,10 +26,11 @@ public:
 	Poly& reduceDegree();
 	bool isZero() const;
 	Poly& convolute();
+	Poly& shift(int n);
 	unsigned char * hash();
 
 	~Poly() { // destructor
-		sodium_memzero(entries, (degree + 1) * sizeof(int));
+		//sodium_memzero(entries, (degree + 1) * sizeof(int));
 		free(entries);
 	}
 
@@ -44,6 +45,7 @@ public:
 			return *this;
 		}
 		if (entries != NULL) { // clean memory already allocated
+			//sodium_memzero(entries, sizeof(int)*(degree + 1));
 			free(entries);
 		}
 		degree = rhs.degree;

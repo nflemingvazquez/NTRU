@@ -36,6 +36,9 @@
     <ClCompile Include="decryption.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="FFT.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="keyGeneration.h">

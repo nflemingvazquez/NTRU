@@ -70,7 +70,7 @@ void polyToFile(Poly a, string filename, string directory)
 	char * arr = (char*)a.getEntries();
 	int size = sizeof(int)*(a.getDegree() + 1);
 	createFile(arr, size, filename, directory);
-	sodium_memzero(arr, size);
+	//sodium_memzero(arr, size);
 	free(arr);
 }
 
@@ -90,8 +90,8 @@ bool convFromFile(string filename, string directory, Poly * convPtr) {
 		memcpy(entries, str, size);
 		int degree = (int)(size / sizeof(int) - 1);
 		Poly result(degree, entries);
-		sodium_memzero(str, size);
-		sodium_memzero(entries, size);
+		//sodium_memzero(str, size);
+		//sodium_memzero(entries, size);
 		free(str);
 		free(entries);
 

@@ -103,16 +103,12 @@ int Poly::getEntry(int n) const
 
 Poly & Poly::reduceDegree()
 {
-	// remove trailing zero entries from polynomial
 	int oldDeg = degree;
+	// remove trailing zero entries from polynomial
 	while (entries[degree] == 0 && degree > 0) {
 		degree--;
 	}
-	int * reduced_arr = (int*)calloc(degree + 1, sizeof(int));
-	memcpy(reduced_arr, entries, (degree + 1) * sizeof(int)); // copy non-trailing part
-	sodium_memzero(entries, sizeof(int)*(oldDeg + 1));
-	free(entries);
-	entries = reduced_arr;
+	entries = (int*)realloc(entries, sizeof(int)*(degree + 1));
 	return *this;
 }
 
@@ -130,14 +126,33 @@ Poly & Poly::convolute()
 		for (int i = ees_N; i <= degree; ++i) { // x^k coefficient of result = sum of x^(k modN) coefficients
 			entries[i % ees_N] += entries[i];
 		}
-		int * arr = (int*)malloc(sizeof(int)*ees_N); // smaller buffer to copy entries into
-		memcpy(arr, entries, sizeof(int)*ees_N);
-		sodium_memzero(entries, sizeof(int)*(degree + 1)); // zero out previously used memory
-		free(entries);
-		entries = arr;
+		entries = (int*)realloc(entries, ees_N * sizeof(int));
+		//sodium_memzero(entries, sizeof(int)*(degree + 1)); // zero out previously used memory
 		degree = ees_N - 1;
 		this->reduceDegree();
 	}
+	return *this;
+}
+
+Poly & Poly::shift(int n)
+{
+	// multiply polynomial by x^n (signed), ignore negative powers
+	int * shifted;
+	if (n < 0) {
+		if (n < -degree) {
+			*this = Poly();
+			return *this;
+		}
+		shifted = (int*)malloc(sizeof(int)*(degree + n + 1));
+		memcpy(shifted, entries - sizeof(int)*n, sizeof(int)*(degree + n + 1));
+	}
+	else {
+		shifted = (int*)malloc(sizeof(int)*(degree + n + 1));
+		memcpy(shifted + sizeof(int)*n, entries, sizeof(int)*(degree + 1));
+	}
+	//free(entries);
+	entries = shifted;
+	degree += n;
 	return *this;
 }
 
@@ -158,6 +173,8 @@ Poly & Poly::operator+=(const Poly rhs)
 	for (int b = 0; b <= rhs.degree; ++b) { // add b mononomials to sum
 		arr[b] += rhs.entries[b];
 	}
+	//sodium_memzero(entries,sizeof(int)*(degree+1));
+	free(entries);
 	this->degree = deg;
 	this->entries = arr;
 	this->reduceDegree();
@@ -183,6 +200,8 @@ Poly & Poly::operator*=(const Poly rhs)
 			arr[i + j] += entries[i] * rhs.entries[j];
 		}
 	}
+	//sodium_memzero(entries, (degree + 1) * sizeof(int));
+	free(entries);
 	degree = deg;
 	entries = arr;
 	return *this;
