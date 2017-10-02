@@ -12,7 +12,7 @@ Poly operator+(Poly lhs, int rhs)
 	return lhs;
 }
 
-Poly operator+(int lhs, Poly & rhs)
+Poly operator+(int lhs, Poly rhs)
 {
 	rhs += lhs;
 	return rhs;
@@ -30,19 +30,19 @@ Poly operator*(Poly lhs, int rhs)
 	return lhs;
 }
 
-Poly operator*(int lhs, Poly & rhs)
+Poly operator*(int lhs, Poly rhs)
 {
 	rhs *= lhs;
 	return rhs;
 }
 
-Poly operator*(PolyTriple lhs, Poly & rhs)
+Poly operator*(PolyTriple lhs, Poly rhs)
 {
 	rhs *= lhs;
 	return rhs;
 }
 
-Poly operator*(Poly & lhs, PolyTriple rhs)
+Poly operator*(Poly lhs, PolyTriple rhs)
 {
 	lhs *= rhs;
 	return lhs;
@@ -60,7 +60,7 @@ Poly operator-(Poly lhs, int rhs)
 	return lhs;
 }
 
-Poly operator-(int lhs, Poly & rhs)
+Poly operator-(int lhs, Poly rhs)
 {
 	rhs = lhs + -rhs;
 	return rhs;
@@ -80,9 +80,10 @@ Poly::Poly(int a, int * b)
 	this->reduceDegree(); // eliminate trailing zeroes
 }
 
-Poly::Poly(PolyTriple triple)
+Poly::Poly(PolyTriple x)
 {
-	*this = triple.a1*triple.a2 + triple.a3;
+	this->entries=NULL;
+	*this = Poly(x.a1*x.a2 + x.a3);
 }
 
 int * Poly::getEntries()
@@ -104,15 +105,10 @@ int Poly::getEntry(int n) const
 Poly & Poly::reduceDegree()
 {
 	// remove trailing zero entries from polynomial
-	int oldDeg = degree;
 	while (entries[degree] == 0 && degree > 0) {
 		degree--;
 	}
-	int * reduced_arr = (int*)calloc(degree + 1, sizeof(int));
-	memcpy(reduced_arr, entries, (degree + 1) * sizeof(int)); // copy non-trailing part
-	sodium_memzero(entries, sizeof(int)*(oldDeg + 1));
-	free(entries);
-	entries = reduced_arr;
+	entries = (int*)realloc(entries, sizeof(int)*(degree + 1));
 	return *this;
 }
 
@@ -130,20 +126,39 @@ Poly & Poly::convolute()
 		for (int i = ees_N; i <= degree; ++i) { // x^k coefficient of result = sum of x^(k modN) coefficients
 			entries[i % ees_N] += entries[i];
 		}
-		int * arr = (int*)malloc(sizeof(int)*ees_N); // smaller buffer to copy entries into
-		memcpy(arr, entries, sizeof(int)*ees_N);
-		sodium_memzero(entries, sizeof(int)*(degree + 1)); // zero out previously used memory
-		free(entries);
-		entries = arr;
+		entries = (int*)realloc(entries, ees_N * sizeof(int));
+		//sodium_memzero(entries, sizeof(int)*(degree + 1)); // zero out previously used memory
 		degree = ees_N - 1;
 		this->reduceDegree();
 	}
 	return *this;
 }
 
+Poly & Poly::shift(int n)
+{
+	// multiply polynomial by x^n (signed), ignore negative powers
+	int * shifted;
+	if (n < 0) {
+		if (n < -degree) {
+			*this = Poly();
+			return *this;
+		}
+		shifted = (int*)malloc(sizeof(int)*(degree + n + 1));
+		memcpy(shifted, entries - sizeof(int)*n, sizeof(int)*(degree + n + 1));
+	}
+	else {
+		shifted = (int*)malloc(sizeof(int)*(degree + n + 1));
+		memcpy(shifted + sizeof(int)*n, entries, sizeof(int)*(degree + 1));
+	}
+	//free(entries);
+	entries = shifted;
+	degree += n;
+	return *this;
+}
+
 unsigned char * Poly::hash()
 {
-	unsigned char hash[crypto_generichash_BYTES];
+	unsigned char * hash=(unsigned char*) malloc(crypto_generichash_BYTES);
 	crypto_generichash(hash, sizeof(hash), (unsigned char*) entries, (degree + 1) * sizeof(int), NULL, 0);
 	return hash;
 }
@@ -158,6 +173,8 @@ Poly & Poly::operator+=(const Poly rhs)
 	for (int b = 0; b <= rhs.degree; ++b) { // add b mononomials to sum
 		arr[b] += rhs.entries[b];
 	}
+	//sodium_memzero(entries,sizeof(int)*(degree+1));
+	free(entries);
 	this->degree = deg;
 	this->entries = arr;
 	this->reduceDegree();
@@ -183,6 +200,8 @@ Poly & Poly::operator*=(const Poly rhs)
 			arr[i + j] += entries[i] * rhs.entries[j];
 		}
 	}
+	//sodium_memzero(entries, (degree + 1) * sizeof(int));
+	free(entries);
 	degree = deg;
 	entries = arr;
 	return *this;
@@ -268,3 +287,6 @@ void Poly::printValue() const
 //	free(arr); // free memory taken by arr	
 //	return *this;
 //}
+
+
+

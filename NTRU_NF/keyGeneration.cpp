@@ -25,7 +25,7 @@ Poly randomConv(int df) {
 		}
 	}
 	Poly result(ees_N - 1, arr);
-	sodium_memzero(arr, ees_N * sizeof(int));
+	//sodium_memzero(arr, ees_N * sizeof(int));
 	free(arr);
 	return result;
 }
@@ -39,30 +39,30 @@ PolyTriple randomTriple(int df1, int df2, int df3)
 	return result;
 }
 
-void generateKeyPair(int N, int p, int s, int r, int q, int df1, int df2, int df3, int dg, Poly * fPtr, Poly * hPtr, PolyTriple * FTriPtr)
+void generateKeyPair(Poly * fPtr, Poly * hPtr, PolyTriple * FTriPtr)
 {
-	Poly f, F, f_q, g, g_q, h;
-	PolyTriple tri;
+	Poly f, f_q, g, g_q, h;
+	PolyTriple triple;
 	bool fInvertible = false;
 	while (fInvertible == false) { // continue until invertible polynomial generated
-		tri = randomTriple(df1,df2,df3);
-		Poly F(tri);
-		f = 1 + p*F;
+		triple = randomTriple(ees_df1,ees_df2,ees_df3);
+		Poly F(triple);
+		f = 1 + ees_p*F;
 		f.convolute();
-		f %= q;
-		fInvertible = convPowerInverse(f, N, s, r, &f_q);
+		f %= ees_q;
+		fInvertible = convPowerInverse(f, ees_N, ees_s, ees_r, &f_q);
 	}
 	bool gInvertible = false;
 	while (gInvertible == false) {
-		g = randomConv(dg) + 1;
-		gInvertible = convPowerInverse(g, N, s, r, &g_q);
+		g = randomConv(ees_dg) + 1;
+		gInvertible = convPowerInverse(g, ees_N, ees_s, ees_r, &g_q);
 	}
 	*fPtr = f;
-	h = f_q*g*p;
+	h = f_q*g*ees_p;
 	h.convolute();
-	h %= q;
+	h %= ees_q;
 	*fPtr = f;
 	*hPtr = h;
-	*FTriPtr = tri;
+	*FTriPtr = triple;
 }
 

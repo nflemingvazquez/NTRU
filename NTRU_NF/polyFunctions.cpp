@@ -46,7 +46,6 @@ void polyDiv(Poly x, Poly y, int modulus, Poly* qPtr, Poly* rPtr) {
 		printf("Polynomial division failed!\n");
 		exit(-1);
 	}
-	int counter = 0; // count number of while loops
 	while (d >= m && !(r.isZero())) { // continue until r=0 or deg r < deg y
 		v = u * r.getEntry(d) * mononomial(d - m);
 		r -= v*y;
@@ -57,6 +56,39 @@ void polyDiv(Poly x, Poly y, int modulus, Poly* qPtr, Poly* rPtr) {
 	q %= modulus;
 	*rPtr = r;
 	*qPtr = q;
+}
+
+bool primeAlmostInverse(Poly a, Poly * bPtr) {
+	if (a.isZero()) return false;
+	int k = 0;
+	Poly b;
+	b += 1; // b=1
+	Poly c;
+	Poly f = a;
+	Poly g = mononomial(ees_N) - 1;
+	while (1) {
+		while (f.getEntry(0) == 0) {
+			f.shift(-1);
+			c.shift(1);
+			k++;
+		}
+		if (f.getDegree()==0) {
+			b *= inverseMod(f.getEntry(0), ees_p);
+			b.shift(ees_N - k);
+			b %= ees_p;
+			*bPtr = b;
+			return true;
+		}
+		if (f.getDegree() < g.getDegree()) {
+			swap(f, g);
+			swap(b, c);
+		}
+		int u = f.getEntry(0)*inverseMod(g.getEntry(0), ees_p);
+		f -= u*g;
+		f %= ees_p;
+		b -= u*c;
+		b %= ees_p;
+	}
 }
 
 void EEA(Poly a, Poly b, int p, Poly* uPtr, Poly* vPtr, Poly* dPtr) {
@@ -125,12 +157,12 @@ bool convPowerInverse(Poly a, int N, int s, int r, Poly * bPtr)
 	NB: modified according to https://assets.onboardsecurity.com/static/downloads/NTRU/resources/NTRUTech014.pdf */
 	Poly b;
 	int q =  (int) pow(s, r); // recalculate q from s, r
-	if (convPrimeInverse(a, N, s, &b) == false) { // if a not invertible in R/(q)
+	if (convPrimeInverse(a, N, s ,&b) == false) { // if a not invertible in R/(q)
 		return false;
 	}
 	int t = s;
 	while (t < q) {
-		t *= t;
+		t *= t; // square t
 		b = b*(2 - a*b);
 		b.convolute();
 		b %= t;

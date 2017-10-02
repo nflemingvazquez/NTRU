@@ -5,4 +5,4 @@
 #include <iostream>
 using namespace std;
 
-void encryptMessage(char * plaintext, size_t lenPlaintext, Poly h, Poly * ePtr);
+bool encryptMessage(char * plaintext, size_t lenPlaintext, Poly h, Poly * ePtr);
